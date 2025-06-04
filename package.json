@@ -1,0 +1,24 @@
+{
+  "name": "3d-블록-월드-편집기",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "generate-favicon": "node scripts/generate-favicon.js && node scripts/convert-to-ico.js"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "three": "^0.177.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "canvas": "^3.1.0",
+    "png-to-ico": "^2.1.8",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  }
+}
