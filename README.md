@@ -2,8 +2,7 @@
 
 React, Three.js, Tailwind CSS로 구축된 간단한 3D 블록 월드 편집기입니다. 사용자는 다양한 유형의 블록을 배치하고 제거하여 구조물과 지형을 만들 수 있습니다.
 
-<!-- ![App Screenshot](placeholder.png) -->
-<!-- 실제 앱 스크린샷이나 GIF로 교체하는 것을 권장합니다. -->
+실행 주소 : https://dev-canvas-pi.vercel.app/
 
 ## 주요 기능
 
