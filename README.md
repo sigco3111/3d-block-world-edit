@@ -2,7 +2,9 @@
 
 React, Three.js, Tailwind CSS로 구축된 간단한 3D 블록 월드 편집기입니다. 사용자는 다양한 유형의 블록을 배치하고 제거하여 구조물과 지형을 만들 수 있습니다.
 
-실행 주소 : https://dev-canvas-pi.vercel.app/
+라이브 데모 : https://sigco3111.github.io/3d-block-world-edit/
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-222222?style=for-the-badge&logo=githubpages)](https://sigco3111.github.io/3d-block-world-edit/)
 
 ## 주요 기능
 
@@ -50,9 +52,32 @@ React, Three.js, Tailwind CSS로 구축된 간단한 3D 블록 월드 편집기�
 └── README.md             # 프로젝트 설명 파일 (현재 파일)
 ```
 
+## 🚀 배포 (Deployment)
+
+이 저장소는 GitHub Actions 또는 수동 gh-pages 브랜치 푸시로 배포됩니다. `vite.config.ts`에 `base: '/3d-block-world-edit/'`가 박혀 있어 빌드 결과가 gh-pages 서브경로에서 정상 작동합니다.
+
+```bash
+npm install
+npm run build
+npx gh-pages -d dist
+```
+
+---
+
 ## 실행 방법
 
-이 프로젝트는 별도의 빌드 과정 없이 웹 브라우저에서 직접 실행할 수 있도록 구성되어 있습니다.
+### GitHub Pages 빌드 (정식)
+
+```bash
+npm install
+npm run dev          # http://localhost:5173
+npm run build        # vite build → dist/
+npm run preview      # serve dist/
+```
+
+### 정적 서버로 직접 실행 (개발/테스트용)
+
+이 프로젝트는 esm.sh CDN 의존성으로 빌드 없이도 작동합니다. 로컬에서 빠르게 실행하려면:
 
 1.  프로젝트 파일 전체를 원하는 로컬 디렉토리에 다운로드하거나 복제합니다.
 2.  웹 브라우저에서 `index.html` 파일을 직접 엽니다.

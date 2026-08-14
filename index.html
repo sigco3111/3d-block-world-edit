@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3D 블록 월드</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/3d-block-world-edit/favicon.ico">
+  <link rel="icon" type="image/png" href="/3d-block-world-edit/favicon.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { margin: 0; overflow: hidden; background-color: #222; color: white; }
@@ -23,11 +23,468 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
 <body>
   <noscript>이 앱을 실행하려면 JavaScript를 활성화해야 합니다.</noscript>
   <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+  <script type="module">
+// index.tsx
+import React3 from "react";
+import ReactDOM from "react-dom/client";
+
+// App.tsx
+import { useState as useState2, useRef as useRef2 } from "react";
+
+// types.ts
+var BlockType = /* @__PURE__ */ ((BlockType2) => {
+  BlockType2["GRASS"] = "GRASS";
+  BlockType2["DIRT"] = "DIRT";
+  BlockType2["STONE"] = "STONE";
+  BlockType2["WOOD"] = "WOOD";
+  BlockType2["WATER"] = "WATER";
+  BlockType2["LEAVES"] = "LEAVES";
+  BlockType2["SAND"] = "SAND";
+  BlockType2["GLASS"] = "GLASS";
+  BlockType2["BRICK"] = "BRICK";
+  BlockType2["OBSIDIAN"] = "OBSIDIAN";
+  return BlockType2;
+})(BlockType || {});
+var BLOCK_SIZE = 1;
+
+// components/BlockPalette.tsx
+import { jsx, jsxs } from "react/jsx-runtime";
+var blockTypes = [
+  { type: "GRASS" /* GRASS */, label: "\uC794\uB514", color: "bg-green-500" },
+  { type: "DIRT" /* DIRT */, label: "\uD759", color: "bg-yellow-700" },
+  { type: "STONE" /* STONE */, label: "\uB3CC", color: "bg-gray-500" },
+  { type: "WOOD" /* WOOD */, label: "\uB098\uBB34", color: "bg-yellow-600" },
+  { type: "WATER" /* WATER */, label: "\uBB3C", color: "bg-blue-500" },
+  { type: "LEAVES" /* LEAVES */, label: "\uB098\uBB47\uC78E", color: "bg-green-700" },
+  { type: "SAND" /* SAND */, label: "\uBAA8\uB798", color: "bg-yellow-300" },
+  { type: "GLASS" /* GLASS */, label: "\uC720\uB9AC", color: "bg-blue-200" },
+  { type: "BRICK" /* BRICK */, label: "\uBCBD\uB3CC", color: "bg-red-700" },
+  { type: "OBSIDIAN" /* OBSIDIAN */, label: "\uD751\uC694\uC11D", color: "bg-indigo-900" }
+];
+var ActionButton = ({ labelText, ...props }) => /* @__PURE__ */ jsx(
+  "button",
+  {
+    ...props,
+    className: `px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out
+                bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-gray-700
+                disabled:bg-gray-500 disabled:opacity-70 disabled:cursor-not-allowed`,
+    children: labelText
+  }
+);
+var BlockPalette = ({
+  selectedBlockType,
+  onSelectBlockType,
+  onExport,
+  onImport,
+  isSceneReady
+}) => {
+  const importInputId = "import-file-input";
+  return /* @__PURE__ */ jsxs("div", { className: "fixed bottom-0 left-0 right-0 bg-gray-700 p-3 flex flex-wrap justify-center items-center gap-3 shadow-lg overflow-x-auto", children: [
+    /* @__PURE__ */ jsx("span", { className: "text-sm font-medium text-gray-300 whitespace-nowrap self-center", children: "\uBE14\uB85D \uC120\uD0DD:" }),
+    /* @__PURE__ */ jsx("div", { className: "flex gap-2", children: blockTypes.map(({ type, label, color }) => /* @__PURE__ */ jsx(
+      "button",
+      {
+        onClick: () => onSelectBlockType(type),
+        className: `w-10 h-10 md:w-12 md:h-12 rounded-md focus:outline-none transition-all duration-150 ease-in-out flex-shrink-0
+                        ${color} 
+                        ${selectedBlockType === type ? "ring-4 ring-offset-2 ring-offset-gray-700 ring-sky-400 transform scale-110" : "hover:opacity-80"}`,
+        title: label,
+        "aria-label": label,
+        "aria-pressed": selectedBlockType === type
+      },
+      type
+    )) }),
+    /* @__PURE__ */ jsx("div", { className: "h-8 border-l border-gray-500 mx-2 self-center hidden md:block", "aria-hidden": "true" }),
+    " ",
+    /* @__PURE__ */ jsxs("div", { className: "flex gap-2", children: [
+      /* @__PURE__ */ jsx(
+        ActionButton,
+        {
+          labelText: "\uB0B4\uBCF4\uB0B4\uAE30",
+          onClick: onExport,
+          disabled: !isSceneReady,
+          "aria-disabled": !isSceneReady
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        "input",
+        {
+          type: "file",
+          id: importInputId,
+          accept: ".json",
+          onChange: onImport,
+          style: { display: "none" },
+          disabled: !isSceneReady,
+          "aria-hidden": "true"
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        "label",
+        {
+          htmlFor: importInputId,
+          className: `px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out cursor-pointer
+                      bg-teal-500 hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-gray-700
+                      ${!isSceneReady ? "bg-gray-500 opacity-70 cursor-not-allowed hover:bg-gray-500" : ""}`,
+          role: "button",
+          tabIndex: isSceneReady ? 0 : -1,
+          "aria-disabled": !isSceneReady,
+          onKeyDown: (e) => {
+            if (isSceneReady && (e.key === "Enter" || e.key === " ")) {
+              e.preventDefault();
+              document.getElementById(importInputId)?.click();
+            }
+          },
+          children: "\uAC00\uC838\uC624\uAE30"
+        }
+      )
+    ] })
+  ] });
+};
+var BlockPalette_default = BlockPalette;
+
+// components/Instructions.tsx
+import { jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
+var Instructions = () => {
+  return /* @__PURE__ */ jsxs2("div", { className: "fixed top-0 left-0 bg-black bg-opacity-50 text-white p-3 text-xs z-10 rounded-br-lg shadow-lg", children: [
+    /* @__PURE__ */ jsx2("h3", { className: "font-bold mb-1", children: "\uC870\uC791\uBC95:" }),
+    /* @__PURE__ */ jsxs2("ul", { className: "list-disc list-inside", children: [
+      /* @__PURE__ */ jsxs2("li", { children: [
+        /* @__PURE__ */ jsx2("span", { className: "font-semibold", children: "\uB9C8\uC6B0\uC2A4 \uC67C\uCABD \uD074\uB9AD:" }),
+        " \uBE14\uB85D \uB193\uAE30"
+      ] }),
+      /* @__PURE__ */ jsxs2("li", { children: [
+        /* @__PURE__ */ jsx2("span", { className: "font-semibold", children: "\uB9C8\uC6B0\uC2A4 \uC624\uB978\uCABD \uD074\uB9AD:" }),
+        " \uBE14\uB85D \uC81C\uAC70"
+      ] }),
+      /* @__PURE__ */ jsxs2("li", { children: [
+        /* @__PURE__ */ jsx2("span", { className: "font-semibold", children: "\uB9C8\uC6B0\uC2A4 \uD720:" }),
+        " \uD655\uB300/\uCD95\uC18C"
+      ] }),
+      /* @__PURE__ */ jsxs2("li", { children: [
+        /* @__PURE__ */ jsx2("span", { className: "font-semibold", children: "\uB9C8\uC6B0\uC2A4 \uD720 \uD074\uB9AD + \uB4DC\uB798\uADF8:" }),
+        " \uC2DC\uC810 \uD68C\uC804"
+      ] })
+    ] })
+  ] });
+};
+var Instructions_default = Instructions;
+
+// hooks/useThreeScene.ts
+import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+var useThreeScene = (mountRef, selectedBlockTypeProp) => {
+  const rendererRef = useRef(null);
+  const sceneRef = useRef(null);
+  const cameraRef = useRef(null);
+  const controlsRef = useRef(null);
+  const raycasterRef = useRef(new THREE.Raycaster());
+  const mouseRef = useRef(new THREE.Vector2());
+  const blocksGroupRef = useRef(new THREE.Group());
+  const blockMaterialsRef = useRef({});
+  const selectedBlockTypeRef = useRef(selectedBlockTypeProp);
+  const [sceneController, setSceneController] = useState(null);
+  useEffect(() => {
+    selectedBlockTypeRef.current = selectedBlockTypeProp;
+  }, [selectedBlockTypeProp]);
+  useEffect(() => {
+    if (!mountRef.current) return () => {
+    };
+    const currentMount = mountRef.current;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(8900331);
+    sceneRef.current = scene;
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      currentMount.clientWidth / currentMount.clientHeight,
+      0.1,
+      1e3
+    );
+    camera.position.set(5, 5, 5);
+    camera.lookAt(0, 0, 0);
+    cameraRef.current = camera;
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    currentMount.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+    blockMaterialsRef.current = {
+      ["GRASS" /* GRASS */]: new THREE.MeshStandardMaterial({ color: 6535497 }),
+      ["DIRT" /* DIRT */]: new THREE.MeshStandardMaterial({ color: 9127187 }),
+      ["STONE" /* STONE */]: new THREE.MeshStandardMaterial({ color: 8421504 }),
+      ["WOOD" /* WOOD */]: new THREE.MeshStandardMaterial({ color: 14596231 }),
+      ["WATER" /* WATER */]: new THREE.MeshStandardMaterial({
+        color: 1876972,
+        opacity: 0.7,
+        transparent: true
+      }),
+      ["LEAVES" /* LEAVES */]: new THREE.MeshStandardMaterial({ color: 2263842 }),
+      ["SAND" /* SAND */]: new THREE.MeshStandardMaterial({ color: 16032864 }),
+      ["GLASS" /* GLASS */]: new THREE.MeshStandardMaterial({
+        color: 11393254,
+        opacity: 0.5,
+        transparent: true
+      }),
+      ["BRICK" /* BRICK */]: new THREE.MeshStandardMaterial({ color: 11674146 }),
+      ["OBSIDIAN" /* OBSIDIAN */]: new THREE.MeshStandardMaterial({ color: 3866683 })
+    };
+    const addBlockInternal = (position, type, interactive = true) => {
+      if (!blocksGroupRef.current || Object.keys(blockMaterialsRef.current).length === 0) return;
+      const geometry = new THREE.BoxGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+      const material = blockMaterialsRef.current[type] || blockMaterialsRef.current["STONE" /* STONE */];
+      const cube = new THREE.Mesh(geometry, material);
+      cube.position.copy(position);
+      cube.castShadow = true;
+      cube.receiveShadow = true;
+      cube.userData = { isBlock: interactive, blockType: type };
+      blocksGroupRef.current.add(cube);
+    };
+    const removeBlockInternal = (blockMesh) => {
+      if (!blocksGroupRef.current) return;
+      blocksGroupRef.current.remove(blockMesh);
+      blockMesh.geometry.dispose();
+      if (Array.isArray(blockMesh.material)) {
+        blockMesh.material.forEach((m) => m.dispose());
+      } else {
+        blockMesh.material.dispose();
+      }
+    };
+    const ambientLight = new THREE.AmbientLight(16777215, 0.6);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(16777215, 0.8);
+    directionalLight.position.set(10, 15, 10);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 1024;
+    directionalLight.shadow.mapSize.height = 1024;
+    scene.add(directionalLight);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.mouseButtons = { MIDDLE: THREE.MOUSE.ROTATE };
+    controls.enableZoom = true;
+    controlsRef.current = controls;
+    scene.add(blocksGroupRef.current);
+    if (blocksGroupRef.current.children.length === 0) {
+      const groundSize = 20;
+      for (let x = -groundSize / 2; x < groundSize / 2; x++) {
+        for (let z = -groundSize / 2; z < groundSize / 2; z++) {
+          addBlockInternal(new THREE.Vector3(x * BLOCK_SIZE, -BLOCK_SIZE, z * BLOCK_SIZE), "GRASS" /* GRASS */, false);
+        }
+      }
+    }
+    let animationFrameId;
+    const animate = () => {
+      animationFrameId = requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    animate();
+    const handleResize = () => {
+      if (cameraRef.current && rendererRef.current && currentMount) {
+        cameraRef.current.aspect = currentMount.clientWidth / currentMount.clientHeight;
+        cameraRef.current.updateProjectionMatrix();
+        rendererRef.current.setSize(currentMount.clientWidth, currentMount.clientHeight);
+      }
+    };
+    const getMouseCoordinates = (event) => {
+      if (!currentMount) return null;
+      const rect = currentMount.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / currentMount.clientWidth * 2 - 1;
+      const y = -((event.clientY - rect.top) / currentMount.clientHeight) * 2 + 1;
+      return { x, y };
+    };
+    const onDocumentMouseDown = (event) => {
+      if (!cameraRef.current || !raycasterRef.current || !mouseRef.current || !blocksGroupRef.current) return;
+      const coords = getMouseCoordinates(event);
+      if (!coords) return;
+      mouseRef.current.set(coords.x, coords.y);
+      raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
+      const intersects = raycasterRef.current.intersectObjects(blocksGroupRef.current.children, true);
+      if (intersects.length > 0) {
+        const intersect = intersects[0];
+        if (!intersect.face || !intersect.object) return;
+        if (event.button === 0) {
+          event.preventDefault();
+          if (intersect.object instanceof THREE.Mesh) {
+            const normal = intersect.face.normal.clone();
+            const newBlockPos = new THREE.Vector3().copy(intersect.object.position).addScaledVector(normal, BLOCK_SIZE);
+            newBlockPos.x = Math.round(newBlockPos.x / BLOCK_SIZE) * BLOCK_SIZE;
+            newBlockPos.y = Math.round(newBlockPos.y / BLOCK_SIZE) * BLOCK_SIZE;
+            newBlockPos.z = Math.round(newBlockPos.z / BLOCK_SIZE) * BLOCK_SIZE;
+            addBlockInternal(newBlockPos, selectedBlockTypeRef.current, true);
+          }
+        } else if (event.button === 2) {
+          event.preventDefault();
+          if (intersect.object instanceof THREE.Mesh && intersect.object.userData.isBlock) {
+            removeBlockInternal(intersect.object);
+          }
+        }
+      }
+    };
+    currentMount.addEventListener("mousedown", onDocumentMouseDown);
+    window.addEventListener("resize", handleResize);
+    const preventContextMenu = (event) => event.button === 2 && event.preventDefault();
+    currentMount.addEventListener("contextmenu", preventContextMenu);
+    const exportBlocks = () => {
+      if (!blocksGroupRef.current) return [];
+      const exported = [];
+      blocksGroupRef.current.children.forEach((child) => {
+        if (child instanceof THREE.Mesh && child.userData.isBlock === true) {
+          exported.push({
+            x: child.position.x,
+            y: child.position.y,
+            z: child.position.z,
+            type: child.userData.blockType
+          });
+        }
+      });
+      return exported;
+    };
+    const importBlocks = (blocksToImport) => {
+      if (!blocksGroupRef.current || !blockMaterialsRef.current || Object.keys(blockMaterialsRef.current).length === 0) {
+        console.warn("Cannot import blocks: scene or materials not ready.");
+        return;
+      }
+      const existingUserBlocks = blocksGroupRef.current.children.filter(
+        (child) => child instanceof THREE.Mesh && child.userData.isBlock === true
+      );
+      existingUserBlocks.forEach((block) => removeBlockInternal(block));
+      blocksToImport.forEach((blockData) => {
+        const position = new THREE.Vector3(blockData.x, blockData.y, blockData.z);
+        addBlockInternal(position, blockData.type, true);
+      });
+    };
+    setSceneController({ exportBlocks, importBlocks });
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", handleResize);
+      currentMount.removeEventListener("mousedown", onDocumentMouseDown);
+      currentMount.removeEventListener("contextmenu", preventContextMenu);
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+        if (rendererRef.current.domElement.parentElement) {
+          rendererRef.current.domElement.parentElement.removeChild(rendererRef.current.domElement);
+        }
+        rendererRef.current = null;
+      }
+      if (controlsRef.current) {
+        controlsRef.current.dispose();
+        controlsRef.current = null;
+      }
+      Object.values(blockMaterialsRef.current).forEach((material) => {
+        if (Array.isArray(material)) material.forEach((m) => m.dispose());
+        else material.dispose();
+      });
+      blockMaterialsRef.current = {};
+      if (blocksGroupRef.current) {
+        blocksGroupRef.current.children.forEach((child) => {
+          if (child instanceof THREE.Mesh) child.geometry.dispose();
+        });
+        blocksGroupRef.current.clear();
+      }
+      if (sceneRef.current) {
+        const lights = sceneRef.current.children.filter((obj) => obj.type.includes("Light"));
+        lights.forEach((light) => {
+          if (typeof light.dispose === "function") light.dispose();
+          sceneRef.current?.remove(light);
+        });
+        if (blocksGroupRef.current) sceneRef.current.remove(blocksGroupRef.current);
+        sceneRef.current = null;
+      }
+      cameraRef.current = null;
+      setSceneController(null);
+    };
+  }, [mountRef]);
+  return sceneController;
+};
+var useThreeScene_default = useThreeScene;
+
+// App.tsx
+import { jsx as jsx3, jsxs as jsxs3 } from "react/jsx-runtime";
+var App = () => {
+  const [selectedBlockType, setSelectedBlockType] = useState2("GRASS" /* GRASS */);
+  const mountRef = useRef2(null);
+  const sceneController = useThreeScene_default(mountRef, selectedBlockType);
+  const handleExportWorld = () => {
+    if (!sceneController) return;
+    const blocks = sceneController.exportBlocks();
+    const worldData = { version: 1, blocks };
+    const jsonData = JSON.stringify(worldData, null, 2);
+    const blob = new Blob([jsonData], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "block-world.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+  const handleImportWorld = (event) => {
+    if (!sceneController) return;
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result;
+        const parsedData = JSON.parse(text);
+        if (parsedData && parsedData.version === 1 && Array.isArray(parsedData.blocks)) {
+          const isValid = parsedData.blocks.every(
+            (b) => typeof b.x === "number" && typeof b.y === "number" && typeof b.z === "number" && Object.values(BlockType).includes(b.type)
+          );
+          if (isValid) {
+            sceneController.importBlocks(parsedData.blocks);
+          } else {
+            console.error("Invalid block data in imported file.");
+            alert("\uAC00\uC838\uC628 \uD30C\uC77C\uC5D0 \uC798\uBABB\uB41C \uBE14\uB85D \uB370\uC774\uD130\uAC00 \uD3EC\uD568\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4.");
+          }
+        } else {
+          console.error("Invalid file format or version for import.");
+          alert("\uC798\uBABB\uB41C \uD30C\uC77C \uD615\uC2DD\uC774\uAC70\uB098 \uC9C0\uC6D0\uB418\uC9C0 \uC54A\uB294 \uBC84\uC804\uC785\uB2C8\uB2E4.");
+        }
+      } catch (error) {
+        console.error("Error parsing imported file:", error);
+        alert("\uD30C\uC77C\uC744 \uAC00\uC838\uC624\uB294 \uC911 \uC624\uB958\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4.");
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+  };
+  return /* @__PURE__ */ jsxs3("div", { className: "flex flex-col h-screen bg-gray-800 text-white", children: [
+    /* @__PURE__ */ jsx3(Instructions_default, {}),
+    /* @__PURE__ */ jsx3("div", { ref: mountRef, className: "flex-grow relative" }),
+    /* @__PURE__ */ jsx3(
+      BlockPalette_default,
+      {
+        selectedBlockType,
+        onSelectBlockType: setSelectedBlockType,
+        onExport: handleExportWorld,
+        onImport: handleImportWorld,
+        isSceneReady: !!sceneController
+      }
+    )
+  ] });
+};
+var App_default = App;
+
+// index.tsx
+import { jsx as jsx4 } from "react/jsx-runtime";
+var rootElement = document.getElementById("root");
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+var root = ReactDOM.createRoot(rootElement);
+root.render(
+  /* @__PURE__ */ jsx4(React3.StrictMode, { children: /* @__PURE__ */ jsx4(App_default, {}) })
+);
+
+  </script>
 </body>
 </html>
